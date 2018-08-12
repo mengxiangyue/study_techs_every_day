@@ -2,6 +2,21 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:[12][multithreading]-gcd-use-4.playground">
+   </FileRef>
+   <FileRef
+      location = "group:[11][multithreading]-gcd-use-3.playground">
+   </FileRef>
+   <FileRef
+      location = "group:[10][multithreading]-gcd-use-2.playground">
+   </FileRef>
+   <FileRef
+      location = "group:[9][multithreading]-gcd-use-1.playground">
+   </FileRef>
+   <FileRef
+      location = "group:/Users/xiangyue/Documents/dev_code/[8][multithreading]-gcd-introduction.playground">
+   </FileRef>
+   <FileRef
       location = "group:[7][multithreading]-operation-use-3.playground">
    </FileRef>
    <FileRef
