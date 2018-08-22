@@ -27,18 +27,14 @@ do {
     // 一般情况下，如果一个 NSBlockOperation 对象封装了多个操作。NSBlockOperation 是否开启新线程，取决于操作的个数。如果添加的操作的个数多，就会自动开启新线程。当然开启的线程数是由系统来决定的
 //    operation.start()
     // 可以添加执行结束 block
+//    operation.addExecutionBlock {
+//        print("block---")
+//    }
 }
 
 do {
     class DownloadOperation: Operation {
         var tag = ""
-        var _isReady: Bool = true {
-            willSet { willChangeValue(forKey: "isReady") }
-            didSet { didChangeValue(forKey: "isReady") }
-        }
-        override var isReady: Bool {
-            return _isReady
-        }
         override func main() {
             if isCancelled == false {
                 Thread.sleep(forTimeInterval: 2)
@@ -47,24 +43,11 @@ do {
         }
     }
     let operation = DownloadOperation()
-    operation.tag = "operation"
-    operation._isReady = false
-    DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
-        operation._isReady = true
-    }
     // 可以添加执行结束 block
     operation.completionBlock = {
         print("completionBlock")
     }
 //    operation.start()
-    let operation1 = DownloadOperation()
-    operation1.tag = "operation1"
-    operation1.addDependency(operation)
-    //    print("operation1 dependencies: \(operation1.dependencies)")
-//    let queue = OperationQueue()
-//    queue.addOperation(operation)
-//    queue.addOperation(operation1)
-    
 }
 
 /*:
@@ -100,7 +83,12 @@ do {
         }
         */
         
+        // 已经被弃用了 不起作用 isAsynchronous 使用这个代替
         override var isConcurrent: Bool {
+            return true
+        }
+        // 默认为flase 但是好像true/false 都会并发执行，如果你了解这个，请告诉我
+        override var isAsynchronous: Bool {
             return true
         }
         override var isExecuting: Bool {
@@ -113,8 +101,9 @@ do {
             return _ready
         }
         
+        
         override func start() {
-            print("\(tag) \(dependencies)")
+//            print("\(tag) \(dependencies)")
 //            guard dependencies.filter({$0.isReady == false}).count == 0 else {
 //                return
 //            }
@@ -137,6 +126,11 @@ do {
             if isCancelled == false {
 //                Thread.sleep(forTimeInterval: 2)
                 print("\(tag) after Sleep \(Thread.current)")
+//                var x: UIView? = UIView()
+//                weak var xp = x
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+//                    print("ttttttttttttttttt: \(xp)")
+//                }
                 completeOperation()
             }
         }
@@ -157,13 +151,24 @@ do {
     operation._ready = false
     operation.tag = "operation"
 
-    let operation1 = MyOperation()
-    operation1.tag = "operation1"
-    operation1.addDependency(operation)
-    print("operation1 dependencies: \(operation1.dependencies)")
+//    let operation1 = MyOperation()
+//    operation1.tag = "operation1"
+//    operation1.addDependency(operation)
+//    print("operation1 dependencies: \(operation1.dependencies)")
+//
     let queue = OperationQueue()
     queue.addOperation(operation)
 //    queue.addOperation(operation1)
+//
+//    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+//        operation._ready = true
+//    }
+    
+//    for index in 0...10 {
+//        let op = MyOperation()
+//        op.tag = "\(index) xx"
+//        queue.addOperation(op)
+//    }
     
     let blockOperation = BlockOperation {
         print("xxffff")
