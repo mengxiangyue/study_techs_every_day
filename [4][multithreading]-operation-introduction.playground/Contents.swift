@@ -21,7 +21,7 @@ import UIKit
  
  执行操作的意思，换句话说就是你在线程中执行的那段代码。
  
- 在 GCD 中是放在 block 中的。在 NSOperation 中，我们使用 NSOperation 子类 NSInvocationOperation、NSBlockOperation，或者自定义子类来封装操作。
+ 在 GCD 中是放在 block 中的。在 NSOperation 中，我们使用 NSOperation 子类 NSInvocationOperation(Swift 中不可用了)、NSBlockOperation，或者自定义子类来封装操作。
  
  2.2 操作队列（Operation Queues）：
  
@@ -29,7 +29,7 @@ import UIKit
  
  操作队列通过设置最大并发操作数（maxConcurrentOperationCount）来控制并发、串行。
  
- NSOperationQueue 为我们提供了两种不同类型的队列：主队列和自定义队列。主队列运行在主线程之上，而自定义队列在后台执行。
+ NSOperationQueue 为我们提供了两种不同类型的队列：主队列和自定义队列。主队列运行在主线程之上，而自定义队列在其他线程执行。
  
  ### 3. NSOperation、NSOperationQueue 使用步骤
  

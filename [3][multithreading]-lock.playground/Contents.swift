@@ -195,6 +195,7 @@ class MyViewController : UIViewController {
  
  下面的代码如果用 NSLock 的话，lock 先锁上了，但未执行解锁的时候，就会进入递归的下一层，而再次请求上锁，阻塞了该线程，线程被阻塞了，自然后面的解锁代码不会执行，而形成了死锁。而 NSRecursiveLock 递归锁就是为了解决这个问题。
  */
+    // 4 4 3 2 1  3-> 3 2 1
     @objc func testNSRecursiveLock() {
         func recursiveFunc(value: Int) {
             self.recursiveLock.lock()
@@ -243,8 +244,8 @@ class MyViewController : UIViewController {
             self.hasPerson = 3
             print("线程 3 has end Person: \(self.hasPerson)")
             // signal 只会随机唤醒一个线程
-            //            self.condition.signal()
-            //            self.condition.signal()
+//                        self.condition.signal()
+//                        self.condition.signal()
             // broadcast 唤醒所有线程
             self.condition.broadcast()
             self.condition.unlock()
@@ -254,7 +255,7 @@ class MyViewController : UIViewController {
     
     
 /*:
- @Synchronized 貌似不支持了  可以使用objc_sync_enter、objc_sync_exit代替，貌似有bug：https://stackoverflow.com/questions/35084754/objc-sync-enter-objc-sync-exit-not-working-with-dispatch-queue-priority-low。建议使用GCD Queue
+ @Synchronized 同步对象 貌似不支持了  可以使用objc_sync_enter、objc_sync_exit代替，貌似有bug：https://stackoverflow.com/questions/35084754/objc-sync-enter-objc-sync-exit-not-working-with-dispatch-queue-priority-low。建议使用GCD Queue
  */
     @objc func testSynchronizedBlock() {
         DispatchQueue.global(qos: .default).async {
@@ -276,12 +277,12 @@ class MyViewController : UIViewController {
     @objc func testDispatchSemaphore() {
         let overTime = DispatchTime.now() + 3
         DispatchQueue.global(qos: .default).async {
-            let result = self.semaphore.wait(timeout: overTime)
+            let result = self.semaphore.wait(timeout: overTime) // 0
             switch result {
             case .success:
                 print("线程1")
                 sleep(2)
-                self.semaphore.signal()
+                self.semaphore.signal() // 1
             case .timedOut:
                 print("线程1超时")
             }
@@ -301,7 +302,7 @@ class MyViewController : UIViewController {
     
     
 /*:
- OSSpinLock 是一种自旋锁，也只有加锁，解锁，尝试加锁三个方法。和 NSLock 不同的是 NSLock 请求加锁失败的话，会先轮询，但一秒过后便会使线程进入 waiting 状态，等待唤醒。而 OSSpinLock 会一直轮询，等待时会消耗大量 CPU 资源，不适用于较长时间的任务
+     OSSpinLock 是一种自旋锁，也只有加锁，解锁，尝试加锁三个方法。和 NSLock 不同的是: NSLock 请求加锁失败的话，会先轮询，但一秒过后便会使线程进入 waiting 状态，等待唤醒。而 OSSpinLock 会一直轮询，等待时会消耗大量 CPU 资源，不适用于较长时间的任务
  
  已经不推荐使用，推荐使用 os_unfair_lock (import os.lock)
  */

@@ -31,19 +31,40 @@ do {
 
 do {
     class DownloadOperation: Operation {
+        var tag = ""
+        var _isReady: Bool = true {
+            willSet { willChangeValue(forKey: "isReady") }
+            didSet { didChangeValue(forKey: "isReady") }
+        }
+        override var isReady: Bool {
+            return _isReady
+        }
         override func main() {
             if isCancelled == false {
                 Thread.sleep(forTimeInterval: 2)
-                print("after Sleep \(Thread.current)")
+                print("\(tag) after Sleep \(Thread.current)")
             }
         }
     }
     let operation = DownloadOperation()
+    operation.tag = "operation"
+    operation._isReady = false
+    DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+        operation._isReady = true
+    }
     // 可以添加执行结束 block
     operation.completionBlock = {
         print("completionBlock")
     }
 //    operation.start()
+    let operation1 = DownloadOperation()
+    operation1.tag = "operation1"
+    operation1.addDependency(operation)
+    //    print("operation1 dependencies: \(operation1.dependencies)")
+//    let queue = OperationQueue()
+//    queue.addOperation(operation)
+//    queue.addOperation(operation1)
+    
 }
 
 /*:
@@ -61,7 +82,11 @@ do {
     class MyOperation: Operation {
         var _executing: Bool = false
         var _finished: Bool = false
-        var _ready: Bool = true
+        var _ready: Bool = true {
+            willSet { willChangeValue(forKey: "isReady") }
+            didSet { didChangeValue(forKey: "isReady") }
+        }
+        var tag = ""
         
         /* 推荐使用这种 更加 swifty
         private var _isExecuting: Bool {
@@ -89,10 +114,17 @@ do {
         }
         
         override func start() {
+            print("\(tag) \(dependencies)")
+//            guard dependencies.filter({$0.isReady == false}).count == 0 else {
+//                return
+//            }
             if isCancelled {
                 willChangeValue(forKey: "isFinished")
                 _finished = true
                 didChangeValue(forKey: "isFinished")
+                return
+            }
+            if isReady == false {
                 return
             }
             willChangeValue(forKey: "isExecuting")
@@ -103,8 +135,8 @@ do {
         
         override func main() {
             if isCancelled == false {
-                Thread.sleep(forTimeInterval: 2)
-                print("after Sleep \(Thread.current)")
+//                Thread.sleep(forTimeInterval: 2)
+                print("\(tag) after Sleep \(Thread.current)")
                 completeOperation()
             }
         }
@@ -121,14 +153,27 @@ do {
     
     let operation = MyOperation()
 //    operation.start()
-    
+
     operation._ready = false
+    operation.tag = "operation"
+
     let operation1 = MyOperation()
+    operation1.tag = "operation1"
     operation1.addDependency(operation)
     print("operation1 dependencies: \(operation1.dependencies)")
     let queue = OperationQueue()
     queue.addOperation(operation)
-    queue.addOperation(operation1)
+//    queue.addOperation(operation1)
+    
+    let blockOperation = BlockOperation {
+        print("xxffff")
+    }
+    blockOperation.addDependency(operation)
+    queue.addOperation(blockOperation)
+
+    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+        operation._ready = true
+    }
 }
 
 /*:
